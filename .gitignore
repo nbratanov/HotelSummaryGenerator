@@ -1,2 +1,5 @@
 # Project exclude paths
 /venv/
+hotel-reviews.csv
+script.txt
+test.txt
