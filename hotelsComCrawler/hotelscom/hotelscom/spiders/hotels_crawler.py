@@ -52,12 +52,12 @@ class Crawler(scrapy.Spider):
         return review_item_groups
 
     def parse_reviews(self, response):
-        filename = "reviews.txt"
+        filename = "../../../data/reviews.txt"
         json_body = json.loads(response.body)
-        hotel_name = self.get_hotel_name(json_body)
+        hotel_name = self.get_hotel_name(json_body).lower()
         review_groups = self.get_review_item_groups(json_body)
         translator = google_translator()
-        separate_filename = hotel_name + '.txt'
+        separate_filename =  "../../../data/" + hotel_name + '.txt'
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
             with open(separate_filename, 'a', encoding="utf-8-sig") as separate_file:
@@ -65,5 +65,6 @@ class Crawler(scrapy.Spider):
                     for i in range(0, len(review_groups)):
                         for review in review_groups[i]:
                             if review is not None and review["description"] is not None and len(review["description"]) > 0:
-                                f.write(hotel_name + ' - ' + translator.translate(review["description"]) + '\n')
-                                separate_file.write(translator.translate(review["description"]) + '\n')
+                                translated_review = translator.translate(review["description"]) + "\n"
+                                f.write(hotel_name + ' - ' + translated_review)
+                                separate_file.write(translated_review)

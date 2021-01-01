@@ -29,18 +29,27 @@ class HotelReviewSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         page = response.url.split('/')[-1]
-        filename = "hotel-reviews.csv"
+        filename = "../../data/hotel-reviews.csv"
         translator = google_translator()
 
         review_schema = self.parse_reviews(response)
+        hotel_name = self.get_hotel_name(response).lower()
+        single_filename = "../../data/" + hotel_name + '.txt'
 
-        with open(filename, 'a', encoding="utf-8") as f:
-            for review in review_schema['reviews']:
-                f.write(translator.translate(review['text']) + "\n")
+        with open(filename, 'a', encoding="utf-8-sig") as f:
+            with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
+                for review in review_schema['reviews']:
+                    if review is not None and review is not None and len(review) > 0:
+                        translated_review = translator.translate(review['text']) + "\n"
+                        f.write(hotel_name + " - " + translated_review)
+                        single_file.write(translated_review)
 
         next_page_link = response.xpath('//a[@class="ui_button nav next primary "]').attrib['href']
         if next_page_link is not None:
             yield Request(BASE_URL + next_page_link, callback=self.parse)
+
+    def get_hotel_name(self, response):
+        return response.xpath('//h1[@id="HEADING"]//text()').get()
 
     def parse_reviews(self, response):
         """
@@ -54,7 +63,6 @@ class HotelReviewSpider(scrapy.Spider):
         print(review_id)
 
         first_review = f'//script[contains(., "{review_id}")]'
-        print(type(first_review))
         regex = r'"reviews":(.*)},"reviewAggregations":'
         print("\n" + first_review)
         prefix = '{ "reviews": '
