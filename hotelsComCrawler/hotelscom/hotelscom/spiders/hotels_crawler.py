@@ -57,9 +57,10 @@ class Crawler(scrapy.Spider):
         hotel_name = self.get_hotel_name(json_body)
         review_groups = self.get_review_item_groups(json_body)
         translator = google_translator()
+        separate_filename = hotel_name + '.txt'
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
-            with open(hotel_name, 'a', encoding="utf-8-sig") as separate_file:
+            with open(separate_filename, 'a', encoding="utf-8-sig") as separate_file:
                 if hotel_name is not None and len(hotel_name) > 0:
                     for i in range(0, len(review_groups)):
                         for review in review_groups[i]:
