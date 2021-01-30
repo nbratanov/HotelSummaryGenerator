@@ -27,11 +27,22 @@ def process_documents(should_clean_document=True):
     return documents_clean
 
 
-def get_summary_for_documents():
+def get_summary_for_documents(sentences):
     sentence_scores = get_sentences_score()
-    summary_sentences = heapq.nlargest(30, sentence_scores, key=sentence_scores.get)
-    summary = ' '.join(summary_sentences)
-    print(summary)
+    print(sentence_scores)
+    summary_sentences = heapq.nlargest(3, sentence_scores, key=sentence_scores.get)
+    print(summary_sentences)
+    for sentence_index in summary_sentences:
+        for word in sentences[sentence_index]:
+            print(word, end=" ", flush=True)
+
+
+def get_longest_sentence(document_tokenized_sentences):
+    longest_sentence_length = 0
+    for sentence in document_tokenized_sentences:
+        if len(sentence) > longest_sentence_length:
+            longest_sentence_length = len(sentence)
+    return longest_sentence_length
 
 
 def get_sentences_score():
@@ -39,13 +50,21 @@ def get_sentences_score():
     with open('./data/hotel amira istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
         word_frequencies = get_weightened_word_frequency(get_document_tokens(document_text.read()))
         document_tokenized_sentences = get_tokenized_sentences_for_documents()
-        for sentence in document_tokenized_sentences:
+        longest_sentence_length = get_longest_sentence(document_tokenized_sentences)
+        print(word_frequencies)
+        for index, sentence in enumerate(document_tokenized_sentences):
+            single_sentence_score = 0
+            if len(sentence) < longest_sentence_length:
+                single_sentence_score = 0.1
+
             for word in sentence:
                 if word in word_frequencies.keys():
-                    if word not in sentence_scores.keys():
-                        sentence_scores[word] = word_frequencies[word]
-                    else:
-                        sentence_scores[word] += word_frequencies[word]
+                    # if sentence not in sentence_scores.keys():
+                    #     single_sentence_score = word_frequencies[word]
+                    # else:
+                    single_sentence_score += word_frequencies[word]
+            sentence_scores[index] = single_sentence_score
+
     #TO DO: Create a map of sentences and scores here
 
     return sentence_scores
@@ -58,9 +77,9 @@ def get_tokenized_sentences_for_documents():
         document_sentences = sent_tokenize(document)
         for sentence in document_sentences:
             tokens = get_document_tokens(sentence)
-            #filtered_tokens = get_filtered_document_tokens(tokens)
+            filtered_tokens = get_filtered_document_tokens(tokens)
             #normalized_tokens = get_normalized_tokens(filtered_tokens)
-            document_senteces.append(tokens)
+            document_senteces.append(filtered_tokens)
 
     return document_senteces
 
@@ -94,7 +113,7 @@ def clean_document(document):
     # Lowercase the document
     document_test = document_test.lower()
     # Remove punctuations
-    document_test = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', document_test)
+    #document_test = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', document_test)
     # Lowercase the numbers
     document_test = re.sub(r'[0-9]', '', document_test)
     # Remove the doubled space

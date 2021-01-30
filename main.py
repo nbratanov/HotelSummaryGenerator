@@ -17,6 +17,7 @@ if __name__ == '__main__':
     cleaned_documents = process_documents()
     #print (get_tokenized_sentences_for_documents())
     #print (get_sentences_score())
-    get_summary_for_documents()
+    sentences = get_tokenized_sentences_for_documents()
+    get_summary_for_documents(sentences)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
