@@ -1,4 +1,5 @@
 import json
+import re
 
 import scrapy
 from scrapy import Request
@@ -21,27 +22,28 @@ class HotelReviewSpider(scrapy.Spider):
 
     def start_requests(self):
         base_url = "https://www.tripadvisor.com/Hotel_Review-d"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or790-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
         initial_hotel_id = 1674691
         last_hotel_id = 1674692
         for hotel_id in range(initial_hotel_id, last_hotel_id):
-            yield scrapy.Request(base_url + str(hotel_id), self.parse)
+            yield Request(base_url + str(hotel_id), self.parse)
 
 
     def parse(self, response, **kwargs):
-        page = response.url.split('/')[-1]
-        filename = "../../data/hotel-reviews.csv"
+        page = response.url.split('/')[-1]  #not used?
+        filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/hotel-reviews.csv"
         translator = google_translator()
 
-        review_schema = self.parse_reviews(response)
+        reviews = self.parse_reviews(response)
         hotel_name = self.get_hotel_name(response).lower()
-        single_filename = "../../data/" + hotel_name + '.txt'
+        single_filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/" + hotel_name + '.txt'
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
             with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
-                for review in review_schema['reviews']:
-                    if review is not None and review is not None and len(review) > 0:
-                        translated_review = translator.translate(review['text']) + "\n"
-                        f.write(hotel_name + " - " + translated_review)
+                for review in reviews.reviews:
+                    if review is not None and review.text is not None and len(review.text) > 0:
+                        translated_review = translator.translate(review.text) + "\n"
+                        f.write(hotel_name + " - " + review.text + "\n")
                         single_file.write(translated_review)
 
         next_page_link = response.xpath('//a[@class="ui_button nav next primary "]').attrib['href']
@@ -70,7 +72,17 @@ class HotelReviewSpider(scrapy.Spider):
 
         reviews = prefix + response.xpath(first_review).re_first(r'"reviews":(.*)},"reviewAggregations":') + suffix
 
-        # review_schema = reviews_model.Reviews.Schema().load(json.loads(reviews))
-        review_schema = json.loads(reviews)
+        try:
+            review_ids = re.findall('"id":([0-9]+?),', reviews)
+            review_texts = re.findall('"text":"(.+?)",', reviews)
+        except AttributeError:
+            raise AttributeError("No text or id field in reviews")
 
-        return review_schema
+        reviews = reviews_model.Reviews()
+        for i in range(5):
+            review = reviews_model.Review(review_ids[i], review_texts[i])
+            reviews.add(review)
+
+        reviews.print()
+
+        return reviews
