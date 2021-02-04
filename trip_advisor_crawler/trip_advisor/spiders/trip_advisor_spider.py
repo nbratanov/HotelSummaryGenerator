@@ -1,17 +1,28 @@
+import sys
+
+# sys.path.append("../../../common/domain/review.py")
+# sys.path.append("../../../common/domain/reviews.py")
+# sys.path.append(".")
+# sys.path.insert(1, '../../../common')
 import json
 import re
 
 import scrapy
 from scrapy import Request
 
+# from ...common.domain.review import Review
+# from ...common.domain.reviews import Reviews
+# sys.path.append("../../../common/domain/review.py")
 from common.domain.review import Review
+# sys.path.append("../../../common/domain/reviews.py")
 from common.domain.reviews import Reviews
-from google_trans_new import google_translator
 
+from google_trans_new import google_translator
 
 BASE_URL = "https://www.tripadvisor.com"
 
-class HotelReviewSpider(scrapy.Spider):
+
+class TripAdvisorSpider(scrapy.Spider):
     name = "tripadvisor"
 
     # start_urls = [
@@ -24,16 +35,15 @@ class HotelReviewSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        base_url = "https://www.tripadvisor.com/Hotel_Review-d"
-        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or790-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-d"
+        base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or790-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
         initial_hotel_id = 1674691
         last_hotel_id = 1674692
         for hotel_id in range(initial_hotel_id, last_hotel_id):
             yield Request(base_url + str(hotel_id), self.parse)
 
-
     def parse(self, response, **kwargs):
-        page = response.url.split('/')[-1]  #not used?
+        page = response.url.split('/')[-1]  # not used?
         filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/hotel-reviews.csv"
         translator = google_translator()
 
@@ -74,16 +84,31 @@ class HotelReviewSpider(scrapy.Spider):
         suffix = "}"
 
         reviews = prefix + response.xpath(first_review).re_first(r'"reviews":(.*)},"reviewAggregations":') + suffix
+        reviews = reviews.replace('null', '"null"')
 
         try:
-            review_ids = re.findall(r'"id":([0-9]+?),', reviews)
-            review_texts = re.findall('"text":"(.+?)",', reviews)
+            review_ids = re.findall('[[,]{"id":([0-9]+?),"url"', reviews)
+            texts = re.findall('"text":"(.+?)",', reviews)
+            city_locations = re.findall('"location":{.*"geo":"(.+?)",', reviews)
+            hotel_publish_dates = re.findall('"publishedDate":"(.+?)"', reviews)
+            ratings = re.findall(',"rating":(.+?),', reviews)
+            languages = re.findall('"language":"(.+?)",', reviews)
+            original_languages = re.findall('"original":"(.+?)",', reviews)
+            translation_types = re.findall('"translationType":"(.+?)",', reviews)
+            #reviewer_hometowns = re.findall('"location":(.+?),', reviews)
+            #print(reviewer_hometowns)
+            reviewer_stay_dates = re.findall('"stayDate":"(.+?)",', reviews)
+            trip_types = re.findall('"tripType":"(.+?)"}', reviews)
+            like_counts = re.findall('"likeCount":(.+?),', reviews)
+
         except AttributeError:
-            raise AttributeError("No text or id field in reviews")
+            raise AttributeError("Some of the fields were not specified.")
 
         reviews = Reviews()
         for i in range(5):
-            review = Review(review_ids[i], review_texts[i])
+            review = Review(review_ids[i], texts[i], city_locations[0], hotel_publish_dates[i], ratings[i],
+                            languages[i], original_languages[i], translation_types[i],
+                            reviewer_stay_dates[i], trip_types[i], like_counts[i])
             reviews.add(review)
 
         reviews.print()

@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'trip_advisor.middlewares.HotelreviewcrawlerSpiderMiddleware': 543,
+#    'trip_advisor.middlewares.TripadvisorcrawlerSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'trip_advisor.middlewares.HotelreviewcrawlerDownloaderMiddleware': 543,
+#    'trip_advisor.middlewares.TripadvisocrawlercrawlerDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'trip_advisor.pipelines.HotelreviewcrawlerPipeline': 300,
+#    'trip_advisor.pipelines.TripadvisocrawlercrawlerPipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)

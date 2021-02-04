@@ -7,6 +7,14 @@
     <orderEntry type="jdk" jdkName="Python 3.7 (TripAdvisorCrawler)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/common" />
+        <option value="$MODULE_DIR$/trip_advisor_crawler" />
+      </list>
+    </option>
+  </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="pytest" />
   </component>

@@ -1,6 +1,6 @@
 from marshmallow_dataclass import dataclass
 from typing import List
-from review import Review
+from .review import Review
 
 
 @dataclass
