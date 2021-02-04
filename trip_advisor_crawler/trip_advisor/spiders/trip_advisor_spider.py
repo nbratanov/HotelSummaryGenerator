@@ -1,20 +1,9 @@
-import sys
-
-# sys.path.append("../../../common/domain/review.py")
-# sys.path.append("../../../common/domain/reviews.py")
-# sys.path.append(".")
-# sys.path.insert(1, '../../../common')
-import json
 import re
 
 import scrapy
 from scrapy import Request
 
-# from ...common.domain.review import Review
-# from ...common.domain.reviews import Reviews
-# sys.path.append("../../../common/domain/review.py")
 from common.domain.review import Review
-# sys.path.append("../../../common/domain/reviews.py")
 from common.domain.reviews import Reviews
 
 from google_trans_new import google_translator
