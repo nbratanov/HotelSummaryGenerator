@@ -10,7 +10,6 @@
   <component name="PyNamespacePackagesService">
     <option name="namespacePackageFolders">
       <list>
-        <option value="$MODULE_DIR$/common" />
         <option value="$MODULE_DIR$/trip_advisor_crawler" />
       </list>
     </option>

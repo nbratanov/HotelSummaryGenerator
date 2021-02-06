@@ -9,7 +9,7 @@ nltk.download('averaged_perceptron_tagger')
 
 def get_frequency_matrix(sentences):
     frequency_matrix = {}
-    stopWords = set(stopwords.words("english"))
+    stop_words = set(stopwords.words("english"))
     ps = PorterStemmer()
     lemmatizer = WordNetLemmatizer()
 
@@ -24,7 +24,7 @@ def get_frequency_matrix(sentences):
                     word = ps.stem(word)
                     if word in freq_table:
                         freq_table[word] += 1
-                    elif word not in stopWords:
+                    elif word not in stop_words:
                         freq_table[word] = 1
 
                 frequency_matrix[sent] = freq_table
