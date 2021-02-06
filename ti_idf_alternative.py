@@ -7,15 +7,6 @@ import nltk
 nltk.download('averaged_perceptron_tagger')
 
 
-def pos_tagging(text):
-    pos_tag = nltk.pos_tag(text.split())
-    pos_tagged_noun_verb = []
-    for word,tag in pos_tag:
-        if tag == "NN" or tag == "NNP" or tag == "NNS" or tag == "RB" or tag == "JJ" or tag == "VB" or tag == "VBD" or tag == "VBG" or tag == "VBN" or tag == "VBP" or tag == "VBZ":
-             pos_tagged_noun_verb.append(word)
-    return pos_tagged_noun_verb
-
-
 def get_frequency_matrix(sentences):
     frequency_matrix = {}
     stopWords = set(stopwords.words("english"))
@@ -108,7 +99,7 @@ def get_longest_sentence_length(sentences):
     return longest_sentence_length
 
 
-def get_sentences_score(tf_idf_matrix, max_sentence_length) -> dict:
+def get_sentences_score(tf_idf_matrix) -> dict:
     sentenceValues = {}
 
     for sentence, f_table in tf_idf_matrix.items():
@@ -131,7 +122,7 @@ def get_sentences_score(tf_idf_matrix, max_sentence_length) -> dict:
         print(f_table)
 
 
-        sentenceValues[sent] = total_score_per_sentence / count_words_in_sentence
+        sentenceValues[sentence] = total_score_per_sentence / count_words_in_sentence
 
    # print(sentenceValues)
     return sentenceValues
@@ -162,16 +153,13 @@ def generate_summary(sentences, sentenceValue, threshold):
 def generate_tf_idf_summary_alternative():
     file = './data/hotel amira istanbul.txt'
     file = open(file, 'r', encoding="utf8")
-    text = file.read()
+    lines = file.readlines()
     #text = remove_special_characters(str(text))
     #text = re.sub(r'\d+', '', text)
-    sentences = sent_tokenize(text)
-    total_documents = len(sentences)
+    total_documents = len(lines)
     # print(sentences)
 
-    max_sent_length = get_longest_sentence_length(sentences)
-
-    freq_matrix = get_frequency_matrix(sentences)
+    freq_matrix = get_frequency_matrix(lines)
     # print(freq_matrix)
 
     tf_matrix = get_tf_matrix(freq_matrix)
@@ -185,13 +173,13 @@ def generate_tf_idf_summary_alternative():
 
     tf_idf_matrix = get_tf_idf_matrix(tf_matrix, idf_matrix)
     # print(tf_idf_matrix)
-
-    sentence_scores = get_sentences_score(tf_idf_matrix, max_sent_length)
+    
+    sentence_scores = get_sentences_score(tf_idf_matrix)
     #print(sentence_scores)
-
+    
     threshold = get_average_score(sentence_scores)
     # print(threshold)
-
-    summary = generate_summary(sentences, sentence_scores, 2.5 * threshold)
+    
+    summary = generate_summary(lines, sentence_scores, 2.5 * threshold)
     print(summary)
     #print(pos_tagging((summary)))
