@@ -13,12 +13,11 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 nltk.download('punkt')
 
-
 def process_documents(should_clean_document=True):
     documents_clean = []
     documents = get_documents()
     for d in documents:
-        with open('./data/' + d, 'r', encoding="utf-8-sig") as document_text:
+        with open('./data/hotel amira istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
             text_to_append = document_text.read()
             if should_clean_document:
                 text_to_append = clean_document(text_to_append)
@@ -27,14 +26,19 @@ def process_documents(should_clean_document=True):
     return documents_clean
 
 
-def get_summary_for_documents(sentences):
-    sentence_scores = get_sentences_score()
-    print(sentence_scores)
-    summary_sentences = heapq.nlargest(3, sentence_scores, key=sentence_scores.get)
+def get_summary_for_documents():
+    with open('./data/hotel amira istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
+        word_frequencies = get_weightened_word_frequency(get_document_tokens(document_text.read()))
+        processed_documents = process_documents(True)
+        for document in processed_documents:
+            document_sentences = sent_tokenize(document)
+    sentence_scores = get_sentences_score(document_sentences, word_frequencies)
+    #print(sentence_scores)
+    summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
     print(summary_sentences)
     for sentence_index in summary_sentences:
-        for word in sentences[sentence_index]:
-            print(word, end=" ", flush=True)
+        for word in document_sentences[sentence_index]:
+            print(word, end="", flush=True)
 
 
 def get_longest_sentence(document_tokenized_sentences):
@@ -45,48 +49,45 @@ def get_longest_sentence(document_tokenized_sentences):
     return longest_sentence_length
 
 
-def get_sentences_score():
+def get_sentences_score(document_sentences, word_frequencies):
     sentence_scores = {}
-    with open('./data/hotel amira istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
-        word_frequencies = get_weightened_word_frequency(get_document_tokens(document_text.read()))
-        document_tokenized_sentences = get_tokenized_sentences_for_documents()
-        longest_sentence_length = get_longest_sentence(document_tokenized_sentences)
-        print(word_frequencies)
-        for index, sentence in enumerate(document_tokenized_sentences):
-            single_sentence_score = 0
-            if len(sentence) < longest_sentence_length:
-                single_sentence_score = 0.1
-
-            for word in sentence:
+    longest_sentence_length = get_longest_sentence(document_sentences)
+    #print(word_frequencies)
+    for index, sentence in enumerate(document_sentences):
+        tokenized_sentence = get_tokenized_sentence(sentence)
+        single_sentence_score = 0
+        if len(tokenized_sentence) < longest_sentence_length:
+            single_sentence_score = 0.000005
+        if tokenized_sentence:
+            for word in tokenized_sentence[0]:
                 if word in word_frequencies.keys():
                     # if sentence not in sentence_scores.keys():
                     #     single_sentence_score = word_frequencies[word]
                     # else:
                     single_sentence_score += word_frequencies[word]
-            sentence_scores[index] = single_sentence_score
+        sentence_scores[index] = single_sentence_score
 
     #TO DO: Create a map of sentences and scores here
 
     return sentence_scores
 
 
-def get_tokenized_sentences_for_documents():
-    document_senteces = []
-    processed_documents = process_documents(True)
-    for document in processed_documents:
-        document_sentences = sent_tokenize(document)
-        for sentence in document_sentences:
-            tokens = get_document_tokens(sentence)
-            filtered_tokens = get_filtered_document_tokens(tokens)
-            #normalized_tokens = get_normalized_tokens(filtered_tokens)
-            document_senteces.append(filtered_tokens)
+def get_tokenized_sentence(sentence):
+    tokenized_sentence = []
+    if '?' not in sentence and len(sentence) > 4:
+        tokens = get_document_tokens(sentence)
+        filtered_tokens = get_filtered_document_tokens(tokens)
+        normalized_tokens = get_normalized_tokens(filtered_tokens)
+        tokenized_sentence.append(normalized_tokens)
 
-    return document_senteces
+    return tokenized_sentence
 
 
 def get_word_frequencies(tokens):
+    filtered_tokens = get_filtered_document_tokens(tokens)
+    normalized_tokens = get_normalized_tokens(filtered_tokens)
     token_frequencies = {}
-    for token in tokens:
+    for token in normalized_tokens:
         if token not in token_frequencies.keys():
             token_frequencies[token] = 1
         else:
@@ -137,8 +138,8 @@ def get_normalized_tokens(tokens):
     lemmatizer = WordNetLemmatizer()
     normalized_tokens = []
     for token in tokens:
-        normalized_token = lemmatizer.lemmatize(token)
-        normalized_token = stemmer.stem(token)
+        lemmatized_token = lemmatizer.lemmatize(token)
+        normalized_token = stemmer.stem(lemmatized_token)
 
         normalized_tokens.append(normalized_token)
 
