@@ -108,19 +108,19 @@ def get_weightened_word_frequency(tokens):
 
 def clean_document(document):
     # Remove Unicode
-    document_test = re.sub(r'[^\x00-\x7F]+', ' ', document)
+    cleaned_document = re.sub(r'[^\x00-\x7F]+', ' ', document)
     # Remove Mentions
-    document_test = re.sub(r'@\w+', '', document_test)
+    cleaned_document = re.sub(r'@\w+', '', cleaned_document)
     # Lowercase the document
-    document_test = document_test.lower()
+    cleaned_document = cleaned_document.lower()
     # Remove punctuations
-    #document_test = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', document_test)
+    #cleaned_document = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', cleaned_document)
     # Lowercase the numbers
-    document_test = re.sub(r'[0-9]', '', document_test)
+    cleaned_document = re.sub(r'[0-9]', '', cleaned_document)
     # Remove the doubled space
-    document_test = re.sub(r'\s{2,}', ' ', document_test)
+    cleaned_document = re.sub(r'\s{2,}', ' ', cleaned_document)
 
-    return document_test
+    return cleaned_document
 
 
 def get_documents():
