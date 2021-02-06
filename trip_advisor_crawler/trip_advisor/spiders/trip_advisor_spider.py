@@ -45,9 +45,12 @@ class TripAdvisorSpider(scrapy.Spider):
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
             with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
-                translated_reviews = translator.translate(reviews.stringify())
-                f.write(translated_reviews + "\n")
-                single_file.write(translated_reviews + "\n")
+                string_reviews = reviews.stringify()
+                if reviews.is_translation_needed is True:
+                    string_reviews = translator.translate(string_reviews)
+
+                f.write(string_reviews)
+                single_file.write(string_reviews)
 
         next_page_link = self.get_next_page_link(response)
         if next_page_link is not None:
