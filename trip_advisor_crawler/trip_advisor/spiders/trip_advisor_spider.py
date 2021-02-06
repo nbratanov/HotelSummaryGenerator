@@ -8,7 +8,11 @@ from common.domain.reviews import Reviews
 
 from google_trans_new import google_translator
 
+import time
+
 BASE_URL = "https://www.tripadvisor.com"
+translator = google_translator()
+start_time = time.time()
 
 
 class TripAdvisorSpider(scrapy.Spider):
@@ -24,8 +28,8 @@ class TripAdvisorSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        # base_url = "https://www.tripadvisor.com/Hotel_Review-d"
-        base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or790-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
+        base_url = "https://www.tripadvisor.com/Hotel_Review-d"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or3440-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
         initial_hotel_id = 1674691
         last_hotel_id = 1674692
         for hotel_id in range(initial_hotel_id, last_hotel_id):
@@ -34,7 +38,6 @@ class TripAdvisorSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         page = response.url.split('/')[-1]  # not used?
         filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/hotel-reviews.csv"
-        translator = google_translator()
 
         reviews = self.parse_reviews(response)
         hotel_name = self.get_hotel_name(response).lower()
@@ -42,18 +45,25 @@ class TripAdvisorSpider(scrapy.Spider):
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
             with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
-                for review in reviews.reviews:
-                    if review is not None and review.text is not None and len(review.text) > 0:
-                        translated_review = translator.translate(review.text) + "\n"
-                        f.write(hotel_name + " - " + review.text + "\n")
-                        single_file.write(translated_review)
+                translated_reviews = translator.translate(reviews.stringify())
+                f.write(translated_reviews + "\n")
+                single_file.write(translated_reviews + "\n")
 
-        next_page_link = response.xpath('//a[@class="ui_button nav next primary "]').attrib['href']
+        next_page_link = self.get_next_page_link(response)
         if next_page_link is not None:
             yield Request(BASE_URL + next_page_link, callback=self.parse)
 
+        estimated_time = time.time() - start_time
+        print(f"Time to complete parsing all reviews for hotel {hotel_name} is : {estimated_time}")
+
     def get_hotel_name(self, response):
         return response.xpath('//h1[@id="HEADING"]//text()').get()
+
+    def get_next_page_link(self, response):
+        next_page_button = response.xpath('//a[@class="ui_button nav next primary "]')
+        if next_page_button:
+            return next_page_button.attrib['href']
+        return None
 
     def parse_reviews(self, response):
         """
@@ -62,44 +72,67 @@ class TripAdvisorSpider(scrapy.Spider):
         reviews = list(map(lambda r: r.replace('<span>', '').replace('</span>', ''), reviews))
 
         """
-
-        review_id = response.xpath('//div[@class="oETBfkHU"]').attrib['data-reviewid']
-        print(review_id)
-
-        first_review = f'//script[contains(., "{review_id}")]'
-        regex = r'"reviews":(.*)},"reviewAggregations":'
-        print("\n" + first_review)
-        prefix = '{ "reviews": '
-        suffix = "}"
-
-        reviews = prefix + response.xpath(first_review).re_first(r'"reviews":(.*)},"reviewAggregations":') + suffix
-        reviews = reviews.replace('null', '"null"')
+        reviews = crawl_reviews_in_json(response)
 
         try:
             review_ids = re.findall('[[,]{"id":([0-9]+?),"url"', reviews)
             texts = re.findall('"text":"(.+?)",', reviews)
-            city_locations = re.findall('"location":{.*"geo":"(.+?)",', reviews)
+            city_locations = re.findall('"parentGeoId":.+?"geo":"(.+?)",', reviews)
             hotel_publish_dates = re.findall('"publishedDate":"(.+?)"', reviews)
             ratings = re.findall(',"rating":(.+?),', reviews)
             languages = re.findall('"language":"(.+?)",', reviews)
             original_languages = re.findall('"original":"(.+?)",', reviews)
             translation_types = re.findall('"translationType":"(.+?)",', reviews)
-            #reviewer_hometowns = re.findall('"location":(.+?),', reviews)
-            #print(reviewer_hometowns)
-            reviewer_stay_dates = re.findall('"stayDate":"(.+?)",', reviews)
-            trip_types = re.findall('"tripType":"(.+?)"}', reviews)
+            # reviewer_hometowns = re.findall('"location":(.+?),', reviews)
+            trip_infos = re.findall('"tripInfo":(.+?),"additionalRatings"', reviews)
+            reviewer_stay_dates = get_reviewer_stay_dates(trip_infos)
+            trip_types = get_reviewer_trip_types(trip_infos)
             like_counts = re.findall('"likeCount":(.+?),', reviews)
 
         except AttributeError:
             raise AttributeError("Some of the fields were not specified.")
 
         reviews = Reviews()
-        for i in range(5):
+        for i in range(len(review_ids)):
             review = Review(review_ids[i], texts[i], city_locations[0], hotel_publish_dates[i], ratings[i],
                             languages[i], original_languages[i], translation_types[i],
                             reviewer_stay_dates[i], trip_types[i], like_counts[i])
             reviews.add(review)
 
-        reviews.print()
-
         return reviews
+
+
+def crawl_reviews_in_json(response):
+    review_id = response.xpath('//div[@class="oETBfkHU"]').attrib['data-reviewid']
+    first_review = f'//script[contains(., "{review_id}")]'
+    prefix = '{ "reviews": '
+    suffix = "}"
+
+    reviews = prefix + response.xpath(first_review).re_first(r'"reviews":(.*)},"reviewAggregations":') + suffix
+    reviews = reviews.replace('null', '"null"')
+
+    return reviews
+
+
+def get_reviewer_stay_dates(trip_infos):
+    reviewer_stay_dates = []
+    for trip_info in trip_infos:
+        stay_date = re.findall('"stayDate":"(.+?)",', trip_info)
+        if stay_date:
+            reviewer_stay_dates.append(stay_date[0])
+        else:
+            reviewer_stay_dates.append("null")
+
+    return reviewer_stay_dates
+
+
+def get_reviewer_trip_types(trip_infos):
+    trip_types = []
+    for trip_info in trip_infos:
+        trip_type = re.findall('"tripType":"(.+?)"', trip_info)
+        if trip_type:
+            trip_types.append(trip_type[0])
+        else:
+            trip_types.append("null")
+
+    return trip_types
