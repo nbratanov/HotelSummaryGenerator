@@ -37,6 +37,7 @@ def get_cleaned_text(text, should_remove_signs):
         cleaned_text = re.sub(r'/', ' ', cleaned_text)
         cleaned_text = re.sub(r'!', ' ', cleaned_text)
         cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
+        cleaned_text = re.sub(r'\\n', '', cleaned_text)
 
     return cleaned_text
 
@@ -199,8 +200,7 @@ def generate_summary(sentence_scores):
     return summary
 
 
-def generate_tf_idf_summary_alternative():
-    file = '../data/hotel_amira_istanbul.txt'
+def generate_tf_idf_summary(file):
     file = open(file, 'r',  encoding="utf-8-sig")
 
     reviews = file.readlines()
@@ -233,8 +233,7 @@ def generate_tf_idf_summary_alternative():
     #print(pos_tagging((summary)))
 
 
-def get_most_used_phrases():
-    file = '../data/hotel_amira_istanbul.txt'
+def get_most_used_phrases(file):
     file = open(file, 'r', encoding="utf-8-sig")
     reviews = file.readlines()
     reviews = clean_reviews(reviews, True)

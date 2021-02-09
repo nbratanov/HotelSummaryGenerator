@@ -13,7 +13,7 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 
-def get_summary_for_documents():
+def get_summary_for_documents(filePath):
     with open('./data/hotel_amira_istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
         parsed_text = document_text.read()
         word_frequencies = get_weightened_word_frequency(get_document_tokens(parsed_text))
@@ -104,6 +104,9 @@ def clean_document(document):
     # Remove Mentions
     cleaned_document = re.sub(r'@\w+', '', cleaned_document)
     cleaned_document = re.sub(r'\\u.{4}', '', cleaned_document)
+    cleaned_document = re.sub(r'\\n', '', cleaned_document)
+    cleaned_document = re.sub(r'\\', ' ', cleaned_document)
+
     # Lowercase the document
     cleaned_document = cleaned_document.lower()
     # Remove punctuations
