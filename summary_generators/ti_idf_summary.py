@@ -107,14 +107,14 @@ def get_word_count_in_all_documents(freq_matrix):
     return word_encounters
 
 
-def get_idf_matrix(freq_matrix, words_encoutners, total_documents):
+def get_idf_matrix(freq_matrix, words_encounters, total_documents):
     idf_matrix = {}
 
     for review, f_table in freq_matrix.items():
         idf_table = {}
 
         for word in f_table.keys():
-            idf_table[word] = math.log10(total_documents / float(words_encoutners[word]))
+            idf_table[word] = math.log10(total_documents / float(words_encounters[word]))
 
         idf_matrix[review] = idf_table
 
@@ -143,7 +143,7 @@ def get_adjusted_score_to_elements_of_speech_contained(words) -> float:
     for entry in bigrams:
         tagged_bigram = nltk.pos_tag(entry)
         if tagged_bigram[0][1] == 'JJ' and (tagged_bigram[1][1] == 'NN' or tagged_bigram[1][1] == 'NNS'):
-            total_score_per_sentence += 0.5
+            total_score_per_sentence += 1
         elif tagged_bigram[0][1] == 'NNP' or tagged_bigram[1][1] == 'NNP':  # Add hotel name as exception
             total_score_per_sentence -= 0.5
 
@@ -171,13 +171,13 @@ def get_sentences_score(tf_idf_matrix) -> dict:
             words = nltk.word_tokenize(sentence)
 
             total_score_per_sentence = get_adjusted_score_to_elements_of_speech_contained(words)
-            if '?' in sentence or len(words) < 6:
-                total_score_per_sentence -= -1
+            if '?' in sentence or len(words) < 5:
+                total_score_per_sentence = 0
+            else:
+                for word, score in f_table.items():
+                    total_score_per_sentence += score
+
             count_words_in_sentence = get_non_stop_words_count(words)
-
-            for word, score in f_table.items():
-                total_score_per_sentence += score
-
             sentence_scores[sentence] = total_score_per_sentence / count_words_in_sentence
 
     return sentence_scores
