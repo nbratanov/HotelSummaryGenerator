@@ -5,6 +5,7 @@ from scrapy import Request
 
 from common.domain.review import Review
 from common.domain.reviews import Reviews
+from textblob import TextBlob
 
 from google_trans_new import google_translator
 
@@ -18,18 +19,17 @@ start_time = time.time()
 class TripAdvisorSpider(scrapy.Spider):
     name = "tripadvisor"
 
-    # start_urls = [
-    #     "https://www.tripadvisor.com/Hotel_Review-g488299-d202929-Reviews-Caesar_Augustus_Hotel"
-    #     "-Anacapri_Island_of_Capri_Province_of_Naples_Campania.html",
-    #     "https://www.tripadvisor.com/Hotel_Review-g187791-d205044-Reviews-Hotel_Artemide-Rome_Lazio.html"
-    # ]
     start_urls = [
         "https://www.tripadvisor.com/Hotel_Review-d"
     ]
 
     def start_requests(self):
-        base_url = "https://www.tripadvisor.com/Hotel_Review-d"
-        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or3440-Hotel_Amira_Istanbul-Istanbul.html#REVIEWS"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-d"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or460-Hotel_Amira_Istanbul-Istanbul.html"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g186338-d8147345-Reviews-InterContinental_London_The_O2-London_England.html"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g318870-d551018-Reviews-Kempinski_Hotel_Grand_Arena-Bansko_Blagoevgrad_Province.html"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g187514-d4719800-Reviews-Only_YOU_Boutique_Hotel_Madrid-Madrid.html"
+        base_url = "https://www.tripadvisor.com/Hotel_Review-g294452-d530275-Reviews-Grand_Hotel_Sofia-Sofia_Sofia_Region.html"
         initial_hotel_id = 1674691
         last_hotel_id = 1674692
         for hotel_id in range(initial_hotel_id, last_hotel_id):
@@ -37,18 +37,19 @@ class TripAdvisorSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
         page = response.url.split('/')[-1]  # not used?
-        filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/hotel-reviews.csv"
+        filename = "./../../../data/hotel-reviews.csv"
 
         reviews = self.parse_reviews(response)
         hotel_name = self.get_hotel_name(response).lower()
-        single_filename = "/Users/bratanovn/Uni-Projects/TripAdvisorCrawler/data/" + hotel_name + '.txt'
+        single_filename = "./../../../data/" + hotel_name + '.txt'
 
         with open(filename, 'a', encoding="utf-8-sig") as f:
             with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
                 string_reviews = reviews.stringify()
+                string_reviews = autocorrect(string_reviews)
+
                 if reviews.is_translation_needed is True:
                     string_reviews = translator.translate(string_reviews)
-
                 f.write(string_reviews)
                 single_file.write(string_reviews)
 
@@ -69,17 +70,12 @@ class TripAdvisorSpider(scrapy.Spider):
         return None
 
     def parse_reviews(self, response):
-        """
-        old version
-        reviews = response.xpath('//q[@class="IRsGHoPm"]//span').getall()
-        reviews = list(map(lambda r: r.replace('<span>', '').replace('</span>', ''), reviews))
 
-        """
         reviews = crawl_reviews_in_json(response)
 
         try:
             review_ids = re.findall('[[,]{"id":([0-9]+?),"url"', reviews)
-            texts = re.findall('"text":"(.+?)",', reviews)
+            texts = re.findall(',"text":"(.+?)","username"', reviews)
             city_locations = re.findall('"parentGeoId":.+?"geo":"(.+?)",', reviews)
             hotel_publish_dates = re.findall('"publishedDate":"(.+?)"', reviews)
             ratings = re.findall(',"rating":(.+?),', reviews)
@@ -113,7 +109,7 @@ def crawl_reviews_in_json(response):
 
     reviews = prefix + response.xpath(first_review).re_first(r'"reviews":(.*)},"reviewAggregations":') + suffix
     reviews = reviews.replace('null', '"null"')
-
+    reviews = re.sub(r'"mgmtResponse":.+?},"text"', '"text"', reviews)
     return reviews
 
 
@@ -139,3 +135,9 @@ def get_reviewer_trip_types(trip_infos):
             trip_types.append("null")
 
     return trip_types
+
+
+def autocorrect(reviews):
+    text_blob = TextBlob(reviews)
+    reviews = str(text_blob.correct())
+    return reviews
