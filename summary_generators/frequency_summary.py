@@ -14,7 +14,7 @@ nltk.download('wordnet')
 
 
 def get_summary_for_documents(filePath):
-    with open('./data/hotel_amira_istanbul.txt', 'r', encoding="utf-8-sig") as document_text:
+    with open(filePath, 'r', encoding="utf-8-sig") as document_text:
         parsed_text = document_text.read()
         word_frequencies = get_weightened_word_frequency(get_document_tokens(parsed_text))
         processed_documents = process_documents(parsed_text, True)
