@@ -12,8 +12,10 @@ nltk.download('averaged_perceptron_tagger')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    get_summary_for_documents('./data/hotel_amira_istanbul.txt')
-    generate_tf_idf_summary('./data/hotel_amira_istanbul.txt')
-    get_most_used_phrases('./data/hotel_amira_istanbul.txt')
+    get_summary_for_documents('./data/kempinski hotel grand arena.txt')
+    print("FREQUENCY SUMMARY \n-----------")
+    generate_tf_idf_summary('./data/kempinski hotel grand arena.txt')
+    print("TF-IDF SUMMARY \n-----------")
+    get_most_used_phrases('./data/kempinski hotel grand arena.txt')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -20,8 +20,6 @@ def get_summary_for_documents(filePath):
         processed_documents = process_documents(parsed_text, True)
         for document in processed_documents:
             document_sentences = sent_tokenize(document)
-    print(document_sentences[9001])
-    print(document_sentences[12562])
     sentence_scores = get_sentences_score(document_sentences, word_frequencies)
     summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
     for sentence_index in summary_sentences:
@@ -30,11 +28,13 @@ def get_summary_for_documents(filePath):
 
 def process_documents(document_text, should_clean_document=True):
     documents_clean = []
-    documents = get_documents()
-    for d in documents:
-        if should_clean_document:
-            text_to_append = clean_document(document_text)
-        documents_clean.append(text_to_append)
+    # //Works for a single document currently
+    # documents = get_documents()
+    # for d in documents:
+    text_to_append = document_text
+    if should_clean_document:
+        text_to_append = clean_document(document_text)
+    documents_clean.append(text_to_append)
 
     return documents_clean
 

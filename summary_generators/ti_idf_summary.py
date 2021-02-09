@@ -28,6 +28,9 @@ def get_cleaned_text(text, should_remove_signs):
     cleaned_text = re.sub(r'[0-9]', '', cleaned_text)
     # Remove the doubled space
     cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)
+    # Remove newlines and bad escape symbols
+    cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
+    cleaned_text = re.sub(r'\\n', '', cleaned_text)
 
     if should_remove_signs:
         cleaned_text = re.sub(r'\?', ' ', cleaned_text)
@@ -36,8 +39,6 @@ def get_cleaned_text(text, should_remove_signs):
         cleaned_text = re.sub(r'-', ' ', cleaned_text)
         cleaned_text = re.sub(r'/', ' ', cleaned_text)
         cleaned_text = re.sub(r'!', ' ', cleaned_text)
-        cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
-        cleaned_text = re.sub(r'\\n', '', cleaned_text)
 
     return cleaned_text
 
@@ -164,25 +165,20 @@ def get_non_stop_words_count(words) -> int:
 def get_sentences_score(tf_idf_matrix) -> dict:
     sentence_scores = {}
 
-    review_counter = 0
     for review, f_table in tf_idf_matrix.items():
-        if review_counter < 4000:
-            sentences = nltk.sent_tokenize(review)
-            for sentence in sentences:
-                total_score_per_sentence = 0
-                words = nltk.word_tokenize(sentence)
+        sentences = nltk.sent_tokenize(review)
+        for sentence in sentences:
+            words = nltk.word_tokenize(sentence)
 
-                total_score_per_sentence = get_adjusted_score_to_elements_of_speech_contained(words)
-                if '?' in sentence or len(words) < 6:
-                    total_score_per_sentence -= 1
-                count_words_in_sentence = get_non_stop_words_count(words)
+            total_score_per_sentence = get_adjusted_score_to_elements_of_speech_contained(words)
+            if '?' in sentence or len(words) < 6:
+                total_score_per_sentence -= -1
+            count_words_in_sentence = get_non_stop_words_count(words)
 
-                for word, score in f_table.items():
-                    total_score_per_sentence += score
+            for word, score in f_table.items():
+                total_score_per_sentence += score
 
-                sentence_scores[sentence] = total_score_per_sentence / count_words_in_sentence
-        print(review_counter)
-        review_counter += 1
+            sentence_scores[sentence] = total_score_per_sentence / count_words_in_sentence
 
     return sentence_scores
 
@@ -195,7 +191,7 @@ def generate_summary(sentence_scores):
     for sentence in sentence_scores.keys():
         if counter < 30:
             counter += 1
-            summary += " " + sentence
+            summary += " " + sentence + "\n"
 
     return summary
 
