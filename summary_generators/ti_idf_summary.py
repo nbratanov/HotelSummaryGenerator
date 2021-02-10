@@ -31,6 +31,8 @@ def get_cleaned_text(text, should_remove_signs):
     # Remove newlines and bad escape symbols
     cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
     cleaned_text = re.sub(r'\\n', '', cleaned_text)
+    # Remove unnecessary plus symbols
+    cleaned_text = re.sub(r'\+', '. ', cleaned_text)
 
     if should_remove_signs:
         cleaned_text = re.sub(r'\?', ' ', cleaned_text)

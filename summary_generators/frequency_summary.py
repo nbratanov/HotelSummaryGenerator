@@ -16,21 +16,25 @@ nltk.download('wordnet')
 def get_summary_for_documents(filePath):
     with open(filePath, 'r', encoding="utf-8-sig") as document_text:
         parsed_text = document_text.read()
-        word_frequencies = get_weightened_word_frequency(get_document_tokens(parsed_text))
+
         processed_documents = process_documents(parsed_text, True)
-        for document in processed_documents:
-            document_sentences = sent_tokenize(document)
-    sentence_scores = get_sentences_score(document_sentences, word_frequencies)
-    summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
-    for sentence_index in summary_sentences:
-        print(document_sentences[sentence_index])
+        word_frequencies = get_weighted_word_frequencies(get_document_tokens(processed_documents[0]))
+
+        """ TODO: Currently works for a single document, should apply for multiple
+            for document in processed_documents: """
+        document_sentences = sent_tokenize(processed_documents[0])
+        sentence_scores = get_sentences_score(document_sentences, word_frequencies)
+        summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
+
+        for sentence_index in summary_sentences:
+            print(document_sentences[sentence_index])
 
 
 def process_documents(document_text, should_clean_document=True):
     documents_clean = []
-    # //Works for a single document currently
-    # documents = get_documents()
-    # for d in documents:
+    """ TODO: Currently works for a single document, should apply for multiple 
+        documents = get_documents()
+        for d in documents: """
     text_to_append = document_text
     if should_clean_document:
         text_to_append = clean_document(document_text)
@@ -52,9 +56,8 @@ def get_sentences_score(document_sentences, word_frequencies):
     longest_sentence_length = get_longest_sentence(document_sentences)
     for index, sentence in enumerate(document_sentences):
         tokenized_sentence = get_tokenized_sentence(sentence)
-        single_sentence_score = 0
-        if len(tokenized_sentence) < longest_sentence_length:
-            single_sentence_score = 0.000005
+
+        single_sentence_score = (longest_sentence_length - len(tokenized_sentence)) * 0.5
         if tokenized_sentence:
             for word in tokenized_sentence[0]:
                 if word in word_frequencies.keys():
@@ -88,7 +91,7 @@ def get_word_frequencies(tokens):
     return token_frequencies
 
 
-def get_weightened_word_frequency(tokens):
+def get_weighted_word_frequencies(tokens):
     word_frequencies = get_word_frequencies(tokens)
     maximum_frequency = max(word_frequencies.values())
 
@@ -106,7 +109,6 @@ def clean_document(document):
     cleaned_document = re.sub(r'\\u.{4}', '', cleaned_document)
     cleaned_document = re.sub(r'\\n', '', cleaned_document)
     cleaned_document = re.sub(r'\\', ' ', cleaned_document)
-
     # Lowercase the document
     cleaned_document = cleaned_document.lower()
     # Remove punctuations
@@ -115,6 +117,10 @@ def clean_document(document):
     cleaned_document = re.sub(r'[0-9]', '', cleaned_document)
     # Remove the doubled space
     cleaned_document = re.sub(r'\s{2,}', ' ', cleaned_document)
+    # Apply space after each sentence
+    cleaned_document = re.sub(r'\.', '. ', cleaned_document)
+    # Remove unnecessary plus symbols
+    cleaned_document = re.sub(r'\+', '. ', cleaned_document)
 
     return cleaned_document
 
