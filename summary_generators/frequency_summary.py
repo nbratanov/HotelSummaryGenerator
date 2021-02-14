@@ -1,7 +1,5 @@
 import re
 import string
-from os import listdir
-from os.path import isfile, join
 import nltk
 from nltk.tokenize import TweetTokenizer
 from nltk.stem.porter import PorterStemmer
@@ -9,6 +7,9 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk import sent_tokenize
 import heapq
+
+from utilities import get_documents
+
 nltk.download('stopwords')
 nltk.download('wordnet')
 
@@ -32,9 +33,10 @@ def get_summary_for_documents(filePath):
 
 def process_documents(document_text, should_clean_document=True):
     documents_clean = []
-    """ TODO: Currently works for a single document, should apply for multiple 
+    """ TODO: Currently works for a single document, should apply for multiple  
         documents = get_documents()
-        for d in documents: """
+        for d in documents:
+         """
     text_to_append = document_text
     if should_clean_document:
         text_to_append = clean_document(document_text)
@@ -123,11 +125,6 @@ def clean_document(document):
     cleaned_document = re.sub(r'\+', '. ', cleaned_document)
 
     return cleaned_document
-
-
-def get_documents():
-    directory_path = './data'
-    return [f for f in listdir(directory_path) if isfile(join(directory_path, f))]
 
 
 def get_document_tokens(document):
