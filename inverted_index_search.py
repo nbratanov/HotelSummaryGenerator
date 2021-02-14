@@ -123,8 +123,14 @@ def or_query(word1, word2):
     if word1 not in postings.keys() and word2 not in postings.keys():
         return []
 
-    postings_word1 = postings[word1]
-    postings_word2 = postings[word2]
+    postings_word1 = []
+    postings_word2 = []
+    
+    if word1 in postings.keys():
+        postings_word1 = postings[word1]
+
+    if word2 in postings.keys():
+        postings_word2 = postings[word2]
 
     documents_results = []
     postings_ind1, postings_ind2 = 0, 0
