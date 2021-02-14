@@ -1,8 +1,18 @@
+import re
 from os import listdir
 from os.path import isfile, join
-import re
 
 from trip_advisor_crawler.database.database_connector import DatabaseConnector
+
+
+# def store_hotel_summaries(hotel_id):
+#     frequency_summary = get_summary_for_documents(hotel_id)
+#     tf_idf_summary = generate_tf_idf_summary(hotel_id)
+#     frequent_phrases = get_most_used_phrases(hotel_id)
+#     hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
+#
+#     database = DatabaseConnector()
+#     database.store_generated_summaries(hotel_summary)
 
 
 def get_reviews_collection(hotel_id):

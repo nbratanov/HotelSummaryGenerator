@@ -1,10 +1,10 @@
 import pickle
-from collections import defaultdict
-from nltk.tokenize import sent_tokenize, TweetTokenizer
-from string import punctuation
 from operator import itemgetter
-from utilities import get_documents, get_cleaned_text
+from string import punctuation
 
+from nltk.tokenize import sent_tokenize, TweetTokenizer
+
+from utilities import get_documents, get_cleaned_text
 
 tokenizer = TweetTokenizer()
 

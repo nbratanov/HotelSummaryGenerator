@@ -40,28 +40,16 @@ class TripAdvisorSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
 
         page = response.url.split('/')[-1]  # not used?
-        filename = "./../../../data/hotel-reviews.csv"
 
-        reviews = self.parse_reviews(response)
+        self.store_reviews(response)
         hotel_name = self.get_hotel_name(response).lower()
-        single_filename = "./../../../data/" + hotel_name + '.txt'
-
-        with open(filename, 'a', encoding="utf-8-sig") as f:
-            with open(single_filename, 'a', encoding="utf-8-sig") as single_file:
-                string_reviews = reviews.stringify()
-                # string_reviews = self.autocorrect(string_reviews)
-
-                if reviews.is_translation_needed is True:
-                    string_reviews = self.translator.translate(string_reviews)
-                f.write(string_reviews)
-                single_file.write(string_reviews)
 
         next_page_link = self.get_next_page_link(response)
         if next_page_link is not None:
             yield Request(self.BASE_URL + next_page_link, callback=self.parse)
 
         estimated_time = time.time() - self.start_time
-        print(f"Time to complete parsing all reviews for hotel.py {hotel_name} is : {estimated_time}")
+        print(f"Time to complete parsing all reviews for hotel - {hotel_name} is : {estimated_time}")
 
     def get_hotel_name(self, response):
         return response.xpath('//h1[@id="HEADING"]//text()').get()
@@ -72,7 +60,7 @@ class TripAdvisorSpider(scrapy.Spider):
             return next_page_button.attrib['href']
         return None
 
-    def parse_reviews(self, response):
+    def store_reviews(self, response):
 
         reviews = self.crawl_reviews_in_json(response)
 
@@ -91,25 +79,24 @@ class TripAdvisorSpider(scrapy.Spider):
             trip_types = self.get_reviewer_trip_types(trip_infos)
             like_counts = re.findall('"likeCount":(.+?),', reviews)
 
-            country = re.findall('"parentGeoId":.+?"longOnlyParent":"(.+?)",', reviews)
         except AttributeError:
             raise AttributeError("Some of the fields were not specified.")
 
-        reviews = Reviews()
         for i in range(len(review_ids)):
             review = Review(review_ids[i], texts[i], hotel_ids[0], city_locations[0], hotel_publish_dates[i],
                             ratings[i],
                             languages[i], original_languages[i], translation_types[i],
                             reviewer_stay_dates[i], trip_types[i], like_counts[i])
-            reviews.add(review)
+
+            if review.should_translate():
+                review.text = self.translator.translate(review.text)
             self.database.add_review(review)
 
         if self.should_store_hotel_info is True:
+            country = self.get_country(reviews)
             hotel = self.parse_hotel(response, hotel_ids[0], country[0], city_locations[0])
             self.database.add_hotel(hotel)
             self.should_store_hotel_info = False
-
-        return reviews
 
     def parse_hotel(self, response, hotel_id, country, city):
 
@@ -170,3 +157,6 @@ class TripAdvisorSpider(scrapy.Spider):
 
     def get_hotel_rating(self, response):
         return response.xpath('//span[@class="_3cjYfwwQ"]//text()').get()
+
+    def get_country(self, reviews):
+        return re.findall('"parentGeoId":.+?"longOnlyParent":"(.+?)",', reviews)[0]

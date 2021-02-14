@@ -22,7 +22,8 @@ class DatabaseConnector:
                 " %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         values = (
             review.id, review.text, review.hotel_id, review.city_location, review.hotel_publish_date, review.rating,
-            review.language, review.original_language, review.translation_type, review.reviewer_stay_date, review.trip_type,
+            review.language, review.original_language, review.translation_type, review.reviewer_stay_date,
+            review.trip_type,
             review.like_count)
         self.cursor.execute(query, values)
         self.database.commit()
@@ -52,10 +53,11 @@ class DatabaseConnector:
 
         return reviews
 
-    def store_generated_summaries(self, hotel_id, frequency_summary, tf_idf_summary, frequent_phrases):
-        query = "INSERT IGNORE INTO hotels (hotel_id, frequency_summary, tf_idf_summary, frequent_phrases) VALUES " \
-                "(%s, %s, %s, %s)"
-        values = (hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
+    def store_generated_summaries(self, hotel_summary):
+        query = "INSERT IGNORE INTO hotel_summaries (hotel_id, frequency_summary, tf_idf_summary, frequent_phrases) " \
+                "VALUES (%s, %s, %s, %s) "
+        values = (hotel_summary.hotel_id, hotel_summary.frequency_summary, hotel_summary.tf_idf_summary,
+                  hotel_summary.frequent_phrases)
         self.cursor.execute(query, values)
         self.database.commit()
 
@@ -69,4 +71,3 @@ class DatabaseConnector:
             reviews.append(review)
 
         return reviews
-

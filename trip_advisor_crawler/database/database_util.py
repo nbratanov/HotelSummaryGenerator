@@ -51,7 +51,7 @@ class DatabaseUtil:
                        ")")
 
         cursor.execute("CREATE TABLE hotel_summaries("
-                       "id VARCHAR(255) NOT NULL PRIMARY KEY,"
+                       "hotel_id VARCHAR(255) NOT NULL PRIMARY KEY,"
                        "frequency_summary TEXT(15000),"
                        "tf_idf_summary TEXT(15000),"
                        "frequent_phrases VARCHAR(5000)"

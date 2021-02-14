@@ -133,7 +133,7 @@ def get_non_stop_words_count(words) -> int:
         if word not in stop_words:
             count_words_in_sentence += 1
 
-    if(count_words_in_sentence == 0):
+    if count_words_in_sentence == 0:
         count_words_in_sentence = 200
 
     return count_words_in_sentence
@@ -168,7 +168,7 @@ def generate_summary(sentence_scores):
     for sentence in sentence_scores.keys():
         if counter < 30:
             counter += 1
-            summary += " " + sentence + "\n"
+            summary += sentence + "\n"
 
     return summary
 
@@ -203,6 +203,8 @@ def generate_tf_idf_summary(hotel_id):
     print(summary)
     #print(pos_tagging((summary)))
 
+    return summary
+
 
 def get_most_used_phrases(hotel_id):
 
@@ -227,6 +229,9 @@ def get_most_used_phrases(hotel_id):
 
     sorted_phrases = dict(sorted(phrases_map.items(), key=lambda item: item[1] and item[0][1] != 'hotel', reverse=True))
 
+    phrases_to_store = ""
     for phrase in list(sorted_phrases.keys())[:15]:
         print(f'{phrase[0]} {phrase[1]}')
+        phrases_to_store += f"{phrase[0]} {phrase[1]} \n"
 
+    return phrases_to_store
