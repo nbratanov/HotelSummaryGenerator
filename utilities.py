@@ -2,9 +2,15 @@ from os import listdir
 from os.path import isfile, join
 import re
 
+from trip_advisor_crawler.database.database_connector import DatabaseConnector
+
 
 def get_reviews_collection(hotel_id):
-    return []
+
+    database = DatabaseConnector()
+    reviews = database.get_review_by_hotel_id(hotel_id)
+
+    return reviews
 
 
 def get_documents():

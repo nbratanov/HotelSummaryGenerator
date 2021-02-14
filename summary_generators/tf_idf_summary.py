@@ -14,7 +14,7 @@ stop_words = set(stopwords.words("english"))
 def clean_reviews(reviews, should_remove_signs):
     cleaned_reviews = []
     for review in reviews:
-        cleaned_review = get_cleaned_text(review, should_remove_signs)
+        cleaned_review = get_cleaned_text(review[0], should_remove_signs)
         cleaned_reviews.append(cleaned_review)
 
     return cleaned_reviews
@@ -204,10 +204,10 @@ def generate_tf_idf_summary(hotel_id):
     #print(pos_tagging((summary)))
 
 
-def get_most_used_phrases(file):
-    file = open(file, 'r', encoding="utf-8-sig")
-    reviews = file.readlines()
-    reviews = clean_reviews(reviews, True)
+def get_most_used_phrases(hotel_id):
+
+    reviews = get_reviews_collection(hotel_id)
+    reviews = clean_reviews(reviews, False)
     freq_matrix = get_frequency_matrix(reviews, False)
     freq_table = get_global_frequency_table(freq_matrix)
     phrases_map = {}

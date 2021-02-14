@@ -18,7 +18,7 @@ def get_summary_for_documents(hotel_id):
     reviews = get_reviews_collection(hotel_id)
     document_text = ""
     for review in reviews:
-        document_text += document_text + " " + review
+        document_text += review[0] + "\n"
 
     processed_documents = process_documents(document_text, True)
     word_frequencies = get_weighted_word_frequencies(get_document_tokens(processed_documents[0]))
