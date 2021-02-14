@@ -71,3 +71,25 @@ class DatabaseConnector:
             reviews.append(review)
 
         return reviews
+
+    def get_hotels_information(self):
+        query = f"SELECT * FROM hotel_summaries as hs JOIN hotels as h ON hs.hotel_id = h.id"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+
+        hotel_summaries = list()
+        for hotel_summary in result:
+            hotel_summaries.append(hotel_summary)
+
+        return hotel_summaries
+
+    def get_hotel_summary_by_id(self):
+        query = f"SELECT * FROM hotel_summaries"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+
+        hotel_summaries = list()
+        for hotel_summary in result:
+            hotel_summaries.append(hotel_summary)
+
+        return hotel_summaries

@@ -27,11 +27,11 @@ class TripAdvisorSpider(scrapy.Spider):
     def start_requests(self):
         # base_url = "https://www.tripadvisor.com/Hotel_Review-d"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or460-Hotel_Amira_Istanbul-Istanbul.html"
-        base_url = "https://www.tripadvisor.com/Hotel_Review-g186338-d8147345-Reviews-InterContinental_London_The_O2-London_England.html"
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g186338-d8147345-Reviews-InterContinental_London_The_O2-London_England.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g318870-d551018-Reviews-Kempinski_Hotel_Grand_Arena-Bansko_Blagoevgrad_Province.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g187514-d4719800-Reviews-Only_YOU_Boutique_Hotel_Madrid-Madrid.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g294452-d530275-Reviews-Grand_Hotel_Sofia-Sofia_Sofia_Region.html"
-        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d16830408-Reviews-Doruk_Palas_Hotel-Istanbul.html"
+        base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d16830408-Reviews-Doruk_Palas_Hotel-Istanbul.html"
         initial_hotel_id = 1674691
         last_hotel_id = 1674692
         for hotel_id in range(initial_hotel_id, last_hotel_id):
@@ -67,7 +67,7 @@ class TripAdvisorSpider(scrapy.Spider):
         try:
             review_ids = re.findall('[[,]{"id":([0-9]+?),"url"', reviews)
             texts = re.findall(',"text":"(.+?)","username"', reviews)
-            hotel_ids = re.findall('"location":{"locationId":(.+?)"', reviews)
+            hotel_ids = re.findall('"location":{"locationId":(.+?),', reviews)
             city_locations = re.findall('"parentGeoId":.+?"geo":"(.+?)",', reviews)
             hotel_publish_dates = re.findall('"publishedDate":"(.+?)"', reviews)
             ratings = re.findall(',"rating":(.+?),', reviews)
@@ -94,7 +94,7 @@ class TripAdvisorSpider(scrapy.Spider):
 
         if self.should_store_hotel_info is True:
             country = self.get_country(reviews)
-            hotel = self.parse_hotel(response, hotel_ids[0], country[0], city_locations[0])
+            hotel = self.parse_hotel(response, hotel_ids[0], country, city_locations[0])
             self.database.add_hotel(hotel)
             self.should_store_hotel_info = False
 
