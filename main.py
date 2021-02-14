@@ -19,7 +19,7 @@ if __name__ == '__main__':
     dictionary = load_dictionary()
     result = and_query('recommend', 'famous')
     print(result)
-    result = or_query('birthday', 'ski')
+    result = or_query('pesho', 'udriebace')
     print(result)
     # get_summary_for_documents('./data/kempinski_hotel_grand_arena.txt')
     # #print("FREQUENCY SUMMARY \n-----------")

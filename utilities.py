@@ -3,6 +3,10 @@ from os.path import isfile, join
 import re
 
 
+def get_reviews_collection(hotel_id):
+    return []
+
+
 def get_documents():
     directory_path = './data'
     return [f for f in listdir(directory_path) if isfile(join(directory_path, f))]

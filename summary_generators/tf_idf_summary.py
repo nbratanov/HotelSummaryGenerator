@@ -4,7 +4,7 @@ from nltk import sent_tokenize, word_tokenize, PorterStemmer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import nltk
-from utilities import get_cleaned_text
+from utilities import get_cleaned_text, get_reviews_collection
 
 nltk.download('averaged_perceptron_tagger')
 
@@ -173,10 +173,8 @@ def generate_summary(sentence_scores):
     return summary
 
 
-def generate_tf_idf_summary(file):
-    file = open(file, 'r',  encoding="utf-8-sig")
-
-    reviews = file.readlines()
+def generate_tf_idf_summary(hotel_id):
+    reviews = get_reviews_collection(hotel_id)
 
     reviews = clean_reviews(reviews, False)
 
