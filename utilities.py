@@ -17,8 +17,8 @@ def get_cleaned_text(text, should_remove_signs):
     cleaned_text = re.sub(r'[^\x00-\x7F]+', ' ', text)
     # Remove Mentions
     cleaned_text = re.sub(r'@\w+', '', cleaned_text)
-    # Lowercase the numbers
-    cleaned_text = re.sub(r'[0-9]', '', cleaned_text)
+    # Remove the numbers
+    #cleaned_text = re.sub(r'[0-9]', '', cleaned_text)
     # Remove the doubled space
     cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)
     # Remove newlines and bad escape symbols

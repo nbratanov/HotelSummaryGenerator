@@ -71,7 +71,8 @@ def get_postings():
         if token in postings.keys():
             postings[token].append((doc_id, doc_freq))
         else:
-            postings[token] = []
+            postings[token] = [(doc_id, doc_freq)]
+
     return postings
 
 
@@ -102,8 +103,11 @@ def and_query(word1, word2):
     else:
         return []
 
-    documents_results = []
+    return get_matching_documents_from_postings(postings_word1, postings_word2)
 
+
+def get_matching_documents_from_postings(postings_word1, postings_word2):
+    documents_results = []
     postings_ind1, postings_ind2 = 0, 0
     while postings_ind1 < len(postings_word1) and postings_ind2 < len(postings_word2):
         doc_id1, doc_id2 = postings_word1[postings_ind1][0], postings_word2[postings_ind2][0]
@@ -115,6 +119,42 @@ def and_query(word1, word2):
             postings_ind1 += 1
         elif doc_id1 > doc_id2:
             postings_ind2 += 1
+    return documents_results
+
+
+def merge_result_with_posting(result, posting):
+    documents_results = []
+    postings_ind1, postings_ind2 = 0, 0
+    while postings_ind1 < len(result) and postings_ind2 < len(posting):
+        doc_id1, doc_id2 = result[postings_ind1], posting[postings_ind2][0]
+        if doc_id1 == doc_id2:
+            documents_results.append(result[postings_ind1])
+            postings_ind1 += 1
+            postings_ind2 += 1
+        elif doc_id1 < doc_id2:
+            postings_ind1 += 1
+        elif doc_id1 > doc_id2:
+            postings_ind2 += 1
+    return documents_results
+
+
+def multiple_and_operation(words_list):
+    postings = load_postings()
+    postings_for_query_words = {}
+    for word in words_list:
+        if word in postings.keys():
+            postings_for_query_words[word] = postings[word]
+        else:
+            return []
+
+    sorted_postings = sorted(postings_for_query_words, key=lambda k: len(postings_for_query_words[k]), reverse=False)
+
+    documents_results = get_matching_documents_from_postings(postings_for_query_words[sorted_postings[0]], postings_for_query_words[sorted_postings[1]])
+    i = 2
+    while i < len(sorted_postings):
+        documents_results = merge_result_with_posting(documents_results, postings_for_query_words[sorted_postings[i]])
+        i += 1
+
     return documents_results
 
 
@@ -145,3 +185,23 @@ def or_query(word1, word2):
     return documents_results
 
 
+def multiple_or_operation(words_list):
+    postings = load_postings()
+    should_return_empty_list = True
+    postings_for_words = []
+    for word in words_list:
+        if word in postings.keys():
+            postings_for_words[word] = postings[word]
+            should_return_empty_list = False
+
+    if should_return_empty_list:
+        return []
+
+    documents_results = []
+    for key in range(len(postings_for_words)):
+        postings_ind1 = 0
+        while postings_ind1 < len(postings_for_words[key]):
+            documents_results.append(postings_for_words[key][0])
+            postings_ind1 += 1
+
+    return documents_results
