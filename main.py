@@ -18,9 +18,11 @@ nltk.download('averaged_perceptron_tagger')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    create_and_save_dictionary_and_postings()
+    #create_and_save_dictionary_and_postings()
     postings = load_postings()
     print(postings)
+    result = multiple_and_operation(['zip', '!zoo', 'zones', '!zoo'])
+    print(result)
     # dictionary = load_dictionary()
     # result = and_query('recommend', 'famous')
     # print(result)

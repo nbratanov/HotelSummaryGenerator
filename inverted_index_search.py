@@ -1,11 +1,10 @@
 import pickle
-from operator import itemgetter
-from string import punctuation
-
+from collections import defaultdict
 from nltk.tokenize import sent_tokenize, TweetTokenizer
-
-from trip_advisor_crawler.database.database_connector import DatabaseConnector
+from string import punctuation
+from operator import itemgetter
 from utilities import get_documents, get_cleaned_text
+import numpy as np
 
 tokenizer = TweetTokenizer()
 
@@ -13,45 +12,35 @@ tokenizer = TweetTokenizer()
 def preprocess_document(document):
     cleaned_text = get_cleaned_text(document, True)
     sentences = sent_tokenize(cleaned_text)
-    tokens = []
-    for _sent in sentences:
-        sent_tokens = tokenizer.tokenize(_sent)
-        sent_tokens = [_tok.lower() for _tok in sent_tokens if _tok not in punctuation]
-        tokens += sent_tokens
-    return tokens
+    tokens_list = []
+    for sentence in sentences:
+        sent_tokens = tokenizer.tokenize(sentence)
+        sent_tokens = [single_token.lower() for single_token in sent_tokens if single_token not in punctuation]
+        tokens_list += sent_tokens
+    return tokens_list
 
 
 def get_token_doc_id_pairs():
-    token_docid = []
+    token_docid_pair = []
     doc_ids = {}
 
-    # documents = get_documents()
-    """TODO refactor"""
-    database = DatabaseConnector()
-    hotels_information = database.get_hotels_information()
-    hotels_information_as_strings = []
-    for hotel_information in hotels_information:
-        hotel_information_as_string = ""
-        for info in hotel_information:
-            hotel_information_as_string += str(info) + " "
-
-        hotels_information_as_strings.append(hotel_information_as_string)
-
-    for i, document in enumerate(hotels_information_as_strings):
+    documents = get_documents()
+    for i, document in enumerate(documents):
         doc_ids[i] = document
-        document_tokens = preprocess_document(document)
-        token_docid += [(token, i) for token in document_tokens]
+        with open('./data/' + document) as f:
+            tokens = preprocess_document(f.read())
+            token_docid_pair += [(token, i) for token in tokens]
 
-    return sorted(token_docid, key=itemgetter(0))
+    return sorted(token_docid_pair, key=itemgetter(0))
 
 
-def get_merge_token_in_doc(sorted_token_docid):
+def get_merge_token_in_doc(sorted_token_docid_pairs):
     merged_tokens_in_doc = []
-    for token, doc_id in sorted_token_docid:
+    for token, doc_id in sorted_token_docid_pairs:
         if merged_tokens_in_doc:
             prev_tok, prev_doc_id, prev_freq = merged_tokens_in_doc[-1]
             if prev_tok == token and prev_doc_id == doc_id:
-                merged_tokens_in_doc[-1] = (token, doc_id, prev_freq+1)
+                merged_tokens_in_doc[-1] = (token, doc_id, prev_freq + 1)
             else:
                 merged_tokens_in_doc.append((token, doc_id, 1))
         else:
@@ -151,19 +140,41 @@ def merge_result_with_posting(result, posting):
 
 def multiple_and_operation(words_list):
     postings = load_postings()
+    not_terms = {}
     postings_for_query_words = {}
     for word in words_list:
+        if word[0] == '!':
+            word = word[1:]
+            not_terms[word] = word
         if word in postings.keys():
             postings_for_query_words[word] = postings[word]
-        else:
+        elif word not in not_terms.keys():
             return []
 
     sorted_postings = sorted(postings_for_query_words, key=lambda k: len(postings_for_query_words[k]), reverse=False)
+    documents_results = get_matching_documents_from_postings(postings_for_query_words[sorted_postings[0]],
+                                                             postings_for_query_words[sorted_postings[1]])
+    if sorted_postings[0] in not_terms.keys() and sorted_postings[1] in not_terms.keys():
+        documents_results = []
+        for key in postings.keys:
+            for i in range(len(postings[key])):
+                documents_results.append(postings[key][i][0])
 
-    documents_results = get_matching_documents_from_postings(postings_for_query_words[sorted_postings[0]], postings_for_query_words[sorted_postings[1]])
+    elif sorted_postings[0] in not_terms.keys():
+        encounters_list = [x[0] for x in postings[sorted_postings[1]]]
+        documents_results = np.setdiff1d(encounters_list, documents_results)
+    elif sorted_postings[1] in not_terms.keys():
+        encounters_list = [x[0] for x in postings[sorted_postings[0]]]
+        documents_results = np.setdiff1d(encounters_list, documents_results)
+
     i = 2
     while i < len(sorted_postings):
-        documents_results = merge_result_with_posting(documents_results, postings_for_query_words[sorted_postings[i]])
+        result_documents_results = merge_result_with_posting(documents_results,
+                                                             postings_for_query_words[sorted_postings[i]])
+        if sorted_postings[i] in not_terms:
+            documents_results = np.setdiff1d(documents_results, result_documents_results)
+        else:
+            documents_results = result_documents_results
         i += 1
 
     return documents_results
@@ -176,7 +187,7 @@ def or_query(word1, word2):
 
     postings_word1 = []
     postings_word2 = []
-    
+
     if word1 in postings.keys():
         postings_word1 = postings[word1]
 
