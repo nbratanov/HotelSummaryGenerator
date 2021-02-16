@@ -2,7 +2,7 @@ import re
 from os import listdir
 from os.path import isfile, join
 
-from crawlers.database.database_connector import DatabaseConnector
+from hotel_information.database.database_connector import DatabaseConnector
 
 
 # def store_hotel_summaries(hotel_id):

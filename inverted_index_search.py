@@ -1,14 +1,15 @@
 import pickle
-from collections import defaultdict
+from operator import itemgetter
+from string import punctuation
+
+import numpy as np
 from nltk.tokenize import sent_tokenize, TweetTokenizer
 
-from crawlers.database.database_connector import DatabaseConnector
-from string import punctuation
-from operator import itemgetter
-from utilities import get_documents, get_cleaned_text
-import numpy as np
+from hotel_information.database.database_connector import DatabaseConnector
+from utilities import get_cleaned_text
 
 tokenizer = TweetTokenizer()
+database = DatabaseConnector()
 
 
 def preprocess_document(document):
@@ -26,12 +27,22 @@ def get_token_doc_id_pairs():
     token_docid_pair = []
     doc_ids = {}
 
-    documents = get_documents()
-    for i, document in enumerate(documents):
+    # documents = get_documents()
+    """TODO refactor"""
+    database = DatabaseConnector()
+    hotels_information = database.get_hotels_information()
+    hotels_information_as_strings = []
+    for hotel_information in hotels_information:
+        hotel_information_as_string = ""
+        for info in hotel_information:
+            hotel_information_as_string += str(info) + " "
+
+        hotels_information_as_strings.append(hotel_information_as_string)
+
+    for i, document in enumerate(hotels_information_as_strings):
         doc_ids[i] = document
-        with open('./data/' + document) as f:
-            tokens = preprocess_document(f.read())
-            token_docid_pair += [(token, i) for token in tokens]
+        document_tokens = preprocess_document(document)
+        token_docid_pair += [(token, i) for token in document_tokens]
 
     return sorted(token_docid_pair, key=itemgetter(0))
 
