@@ -1,14 +1,13 @@
-import re
-import string
-import nltk
-from nltk.tokenize import TweetTokenizer
-from nltk.stem.porter import PorterStemmer
-from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
-from nltk import sent_tokenize
 import heapq
 
-from utilities import get_documents, get_reviews_collection, get_cleaned_text
+import nltk
+from nltk import sent_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.stem.porter import PorterStemmer
+from nltk.tokenize import TweetTokenizer
+
+from utilities import get_reviews_collection, get_cleaned_text
 
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -18,7 +17,7 @@ def get_summary_for_documents(hotel_id):
     reviews = get_reviews_collection(hotel_id)
     document_text = ""
     for review in reviews:
-        document_text += document_text + " " + review
+        document_text += review[0] + "\n"
 
     processed_documents = process_documents(document_text, True)
     word_frequencies = get_weighted_word_frequencies(get_document_tokens(processed_documents[0]))
@@ -29,8 +28,12 @@ def get_summary_for_documents(hotel_id):
     sentence_scores = get_sentences_score(document_sentences, word_frequencies)
     summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
 
+    frequency_summary = ""
     for sentence_index in summary_sentences:
         print(document_sentences[sentence_index])
+        frequency_summary += document_sentences[sentence_index] + "\n"
+
+    return frequency_summary
 
 
 def process_documents(document_text, should_clean_document=True):

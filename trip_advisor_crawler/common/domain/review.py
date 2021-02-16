@@ -31,3 +31,6 @@ class Review:
         self.reviewer_stay_date = reviewer_stay_date
         self.trip_type = trip_type
         self.like_count = like_count
+
+    def should_translate(self):
+        return self.language != "en"
