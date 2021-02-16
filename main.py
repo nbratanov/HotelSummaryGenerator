@@ -9,10 +9,10 @@ from inverted_index_search import create_and_save_dictionary_and_postings, load_
     or_query, multiple_and_operation
 from summary_generators.frequency_summary import get_summary_for_documents
 from summary_generators.tf_idf_summary import generate_tf_idf_summary, get_most_used_phrases
-from trip_advisor_crawler.common.domain.hotel_summary import HotelSummary
+from crawlers.common.domain.hotel_summary import HotelSummary
 
-from trip_advisor_crawler.database.database_util import DatabaseUtil
-from trip_advisor_crawler.database.database_connector import DatabaseConnector
+from crawlers.database.database_util import DatabaseUtil
+from crawlers.database.database_connector import DatabaseConnector
 
 nltk.download('averaged_perceptron_tagger')
 

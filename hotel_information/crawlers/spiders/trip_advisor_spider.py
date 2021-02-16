@@ -1,11 +1,9 @@
-import json
 import re
 import time
 
 import scrapy
 from common.domain.hotel import Hotel
 from common.domain.review import Review
-from common.domain.reviews import Reviews
 from database.database_connector import DatabaseConnector
 from google_trans_new import google_translator
 from scrapy import Request

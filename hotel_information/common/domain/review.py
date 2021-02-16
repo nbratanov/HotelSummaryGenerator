@@ -34,3 +34,6 @@ class Review:
 
     def should_translate(self):
         return self.language != "en"
+
+    def should_translate_for_hotels(self):
+        return "en" not in self.language
