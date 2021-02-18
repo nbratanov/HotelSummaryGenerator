@@ -23,15 +23,15 @@ class TripAdvisorSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        # base_url = "https://www.tripadvisor.com/Hotel_Review-d"
+        base_url = "https://www.tripadvisor.com/Hotel_Review-d"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d1674691-Reviews-or460-Hotel_Amira_Istanbul-Istanbul.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g186338-d8147345-Reviews-InterContinental_London_The_O2-London_England.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g318870-d551018-Reviews-Kempinski_Hotel_Grand_Arena-Bansko_Blagoevgrad_Province.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g187514-d4719800-Reviews-Only_YOU_Boutique_Hotel_Madrid-Madrid.html"
         # base_url = "https://www.tripadvisor.com/Hotel_Review-g294452-d530275-Reviews-Grand_Hotel_Sofia-Sofia_Sofia_Region.html"
-        base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d16830408-Reviews-Doruk_Palas_Hotel-Istanbul.html"
-        initial_hotel_id = 1674691
-        last_hotel_id = 1674692
+        # base_url = "https://www.tripadvisor.com/Hotel_Review-g293974-d16830408-Reviews-Doruk_Palas_Hotel-Istanbul.html"
+        initial_hotel_id = 1674690
+        last_hotel_id = 1674700
         for hotel_id in range(initial_hotel_id, last_hotel_id):
             yield Request(base_url + str(hotel_id), self.parse)
 

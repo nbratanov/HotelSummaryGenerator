@@ -38,12 +38,12 @@ if __name__ == '__main__':
     # DatabaseUtil().setup_database()
     # DatabaseUtil().setup_tables()
 
-    # hotel_id = "16830408"
+    hotel_id = "1674691"
     # hotel_id = "8147345"
-    # frequency_summary = get_summary_for_documents(hotel_id)
+    frequency_summary = get_summary_for_documents(hotel_id)
     tf_idf_summary = generate_tf_idf_summary(hotel_id)
     frequent_phrases = get_most_used_phrases(hotel_id)
-    hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
+    #hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
     #
     #database = DatabaseConnector()
     # database.store_generated_summaries(hotel_summary)

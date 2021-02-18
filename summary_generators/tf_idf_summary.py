@@ -120,7 +120,7 @@ def get_adjusted_score_to_elements_of_speech_contained(words) -> float:
     for entry in bigrams:
         tagged_bigram = nltk.pos_tag(entry)
         if tagged_bigram[0][1] == 'JJ' and (tagged_bigram[1][1] == 'NN' or tagged_bigram[1][1] == 'NNS'):
-            total_score_per_sentence += 1
+            total_score_per_sentence += 2
         elif tagged_bigram[0][1] == 'NNP' or tagged_bigram[1][1] == 'NNP':  # Add hotel name as exception
             total_score_per_sentence -= 0.5
 
