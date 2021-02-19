@@ -16,13 +16,29 @@ from hotel_information.database.database_connector import DatabaseConnector
 
 nltk.download('averaged_perceptron_tagger')
 
+
+def setup_database():
+    DatabaseUtil().setup_database()
+    DatabaseUtil().setup_tables()
+
+
+def generate_review(hotel_id):
+    frequency_summary = get_summary_for_documents(hotel_id)
+    tf_idf_summary = generate_tf_idf_summary(hotel_id)
+    frequent_phrases = get_most_used_phrases(hotel_id)
+    hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
+
+    database = DatabaseConnector()
+    database.store_generated_summaries(hotel_summary)
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #create_and_save_dictionary_and_postings()
-    postings = load_postings()
-    print(postings)
-    result = multiple_and_operation(['zip', '!zoo', 'zones', '!zoo'])
-    print(result)
+    # postings = load_postings()
+    # print(postings)
+    # result = multiple_and_operation(['zip', '!zoo', 'zones', '!zoo'])
+    # print(result)
     # dictionary = load_dictionary()
     # result = and_query('recommend', 'famous')
     # print(result)
@@ -35,18 +51,8 @@ if __name__ == '__main__':
     # print("TF-IDF SUMMARY \n-----------")
     # get_most_used_phrases("16830408")
 
-    # DatabaseUtil().setup_database()
-    # DatabaseUtil().setup_tables()
-
-    hotel_id = "1674691"
-    # hotel_id = "8147345"
-    frequency_summary = get_summary_for_documents(hotel_id)
-    tf_idf_summary = generate_tf_idf_summary(hotel_id)
-    frequent_phrases = get_most_used_phrases(hotel_id)
-    #hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
-    #
-    #database = DatabaseConnector()
-    # database.store_generated_summaries(hotel_summary)
-    #database.get_hotels_information()
+    # hotel_id = "16830408"
+    hotel_id = "8147345"
+    generate_review(hotel_id)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

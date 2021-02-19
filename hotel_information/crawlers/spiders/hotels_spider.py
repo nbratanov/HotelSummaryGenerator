@@ -17,19 +17,21 @@ class HotelsComCrawler(scrapy.Spider):
     translator = google_translator()
 
     def start_requests(self):
-        initial_hotel_id = 356070
-        last_hotel_id = 356072
+        initial_hotel_id = 360000
+        last_hotel_id = 366000
         for hotel_id in range(initial_hotel_id, last_hotel_id):
             yield scrapy.Request(self.BASE_URL + str(hotel_id), self.parse)
 
     def parse(self, response, **kwargs):
         if response.request.url != "https://www.hotels.com/":
             number_of_pages = self.get_number_of_pages(response)
-            self.amenities = self.get_hotel_amenities(response)
 
-            for reviews_page_number in range(number_of_pages):
-                review_pages_request_url = response.request.url + '-tr-p' + str(reviews_page_number) + '/?ajax=true&reviewTab=brand-reviews&ajax=true'
-                yield scrapy.Request(review_pages_request_url, self.parse_reviews)
+            if number_of_pages is not None:
+                self.amenities = self.get_hotel_amenities(response)
+
+                for reviews_page_number in range(number_of_pages):
+                    review_pages_request_url = response.request.url + '-tr-p' + str(reviews_page_number) + '/?ajax=true&reviewTab=brand-reviews&ajax=true'
+                    yield scrapy.Request(review_pages_request_url, self.parse_reviews)
 
     def parse_reviews(self, response):
         json_response = json.loads(response.body)
@@ -42,10 +44,12 @@ class HotelsComCrawler(scrapy.Spider):
 
     def get_number_of_pages(self, response):
         pages = str(response.xpath('//a[@class="more-reviews"]//text()').get())
-        pages = pages.replace('From ', '')
-        pages = pages.replace(' reviews', '')
-
-        return int((int(pages) / 50) + 1)
+        if pages is not None and pages != "" and pages != "None":
+            pages = pages.replace('From ', '')
+            pages = pages.replace(' reviews', '')
+            pages = pages.replace(',', '')
+            return int(float((int(pages) / 50) + 1))
+        return None
 
     def get_json_body(self, json_object):
         json_data = json_object["data"]
