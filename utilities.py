@@ -37,11 +37,13 @@ def get_cleaned_text(text, should_remove_signs):
     #cleaned_text = re.sub(r'[0-9]', '', cleaned_text)
     # Remove the doubled space
     cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)
+    # Remove the doubled comma
+    cleaned_text = re.sub(r',{2,}', ', ', cleaned_text)
     # Remove newlines and bad escape symbols
     cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
     cleaned_text = re.sub(r'\\n', '', cleaned_text)
     # Remove unnecessary plus symbols
-    cleaned_text = re.sub(r'\+', '. ', cleaned_text)
+    cleaned_text = re.sub(r'\+', '', cleaned_text)
     cleaned_text = re.sub(r'#', '', cleaned_text)
     cleaned_text = re.sub(r'\(', '', cleaned_text)
     cleaned_text = re.sub(r'\)', '', cleaned_text)
@@ -53,6 +55,7 @@ def get_cleaned_text(text, should_remove_signs):
     cleaned_text = re.sub(r'/', ' ', cleaned_text)
     cleaned_text = re.sub(r'\'', '', cleaned_text)
     cleaned_text = re.sub(r'\"', '', cleaned_text)
+    cleaned_text = re.sub(r'\.([A-Za-z]{1})', r'. \1', cleaned_text)
 
     if should_remove_signs:
         cleaned_text = re.sub(r'\?', ' ', cleaned_text)

@@ -1,8 +1,3 @@
-# This is a sample Python script.
-
-# Press ⇧F10 to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
 import nltk
 
 from inverted_index_search import create_and_save_dictionary_and_postings, load_postings, load_dictionary, and_query, \
@@ -23,9 +18,18 @@ def setup_database():
 
 
 def generate_review(hotel_id):
+    print("FREQUENCY SUMMARY \n-----------")
     frequency_summary = get_summary_for_documents(hotel_id)
+    print("FREQUENCY SUMMARY \n-----------")
+
+    print("TF-IDF SUMMARY \n-----------")
     tf_idf_summary = generate_tf_idf_summary(hotel_id)
+    print("TF-IDF SUMMARY \n-----------")
+
+    print("MOST USED PHRASES \n-----------")
     frequent_phrases = get_most_used_phrases(hotel_id)
+    print("MOST USED PHRASES \n-----------")
+
     hotel_summary = HotelSummary(hotel_id, frequency_summary, tf_idf_summary, frequent_phrases)
 
     database = DatabaseConnector()
@@ -34,25 +38,11 @@ def generate_review(hotel_id):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    #create_and_save_dictionary_and_postings()
-    # postings = load_postings()
-    # print(postings)
-    # result = multiple_and_operation(['zip', '!zoo', 'zones', '!zoo'])
-    # print(result)
-    # dictionary = load_dictionary()
-    # result = and_query('recommend', 'famous')
-    # print(result)
-    # result = or_query('pesho', 'udriebace')
-    # print(result)
-
-    # get_summary_for_documents("16830408")
-    # print("FREQUENCY SUMMARY \n-----------")
-    # generate_tf_idf_summary("16830408")
-    # print("TF-IDF SUMMARY \n-----------")
-    # get_most_used_phrases("16830408")
-
-    # hotel_id = "16830408"
-    hotel_id = "8147345"
+    #hotel_id = "16830408"
+    hotel_id = "1674691"
     generate_review(hotel_id)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    print("EXAMPLE SEARCH \n-----------")
+    create_and_save_dictionary_and_postings()
+    result = multiple_and_operation(['free', 'internet'])
+    print(result)
