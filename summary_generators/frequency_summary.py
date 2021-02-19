@@ -12,6 +12,8 @@ from utilities import get_reviews_collection, get_cleaned_text
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+""" Generate summary for single document """
+
 
 def get_summary_for_documents(hotel_id):
     reviews = get_reviews_collection(hotel_id)
@@ -22,8 +24,6 @@ def get_summary_for_documents(hotel_id):
     processed_documents = process_documents(document_text, True)
     word_frequencies = get_weighted_word_frequencies(get_document_tokens(processed_documents[0]))
 
-    """ TODO: Currently works for a single document, should apply for multiple
-        for document in processed_documents: """
     document_sentences = sent_tokenize(processed_documents[0])
     sentence_scores = get_sentences_score(document_sentences, word_frequencies)
     summary_sentences = heapq.nlargest(8, sentence_scores, key=sentence_scores.get)
@@ -38,10 +38,6 @@ def get_summary_for_documents(hotel_id):
 
 def process_documents(document_text, should_clean_document=True):
     documents_clean = []
-    """ TODO: Currently works for a single document, should apply for multiple  
-        documents = get_documents()
-        for d in documents:
-         """
     text_to_append = document_text
     if should_clean_document:
         text_to_append = get_cleaned_text(document_text, False)

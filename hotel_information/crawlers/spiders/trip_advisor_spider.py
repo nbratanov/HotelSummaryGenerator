@@ -31,8 +31,6 @@ class TripAdvisorSpider(scrapy.Spider):
 
     def parse(self, response, **kwargs):
 
-        page = response.url.split('/')[-1]  # not used?
-
         self.store_reviews(response)
         hotel_name = self.get_hotel_name(response).lower()
 

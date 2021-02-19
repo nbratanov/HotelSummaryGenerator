@@ -27,8 +27,6 @@ def get_token_doc_id_pairs():
     token_docid_pair = []
     doc_ids = {}
 
-    # documents = get_documents()
-    """TODO refactor"""
     database = DatabaseConnector()
     hotels_information = database.get_hotels_information()
     hotels_information_as_strings = []
